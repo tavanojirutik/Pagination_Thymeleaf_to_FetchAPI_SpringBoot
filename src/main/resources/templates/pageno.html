@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Insert title here</title>
+
+	<style>
+		.container {
+			margin: 20px auto;
+			width: 80%;
+		}
+
+		#employeeTable {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		#employeeTable th,
+		#employeeTable td {
+			border: 1px solid #ccc;
+			padding: 8px;
+			text-align: left;
+		}
+
+		#employeeTable th {
+			background-color: #f2f2f2;
+		}
+
+		#resultbody tr:nth-child(even) {
+			background-color: #f9f9f9;
+		}
+
+		#resultbody tr:hover {
+			background-color: #e0e0e0;
+		}
+
+		/* Add these styles to your existing styles */
+		.pagination {
+			display: flex;
+			list-style: none;
+			padding: 0;
+			margin: 20px 0;
+			/* Adjust margin as needed */
+		}
+
+		.pagination a {
+			color: #007bff;
+			text-decoration: none;
+			padding: 8px 16px;
+			border: 1px solid #007bff;
+			margin: 0 4px;
+			border-radius: 4px;
+		}
+
+		.pagination a:hover {
+			background-color: #007bff;
+			color: #fff;
+		}
+
+		.pagination a.current-page {
+			background-color: #007bff;
+			color: #fff;
+		}
+	</style>
+
+</head>
+
+<body>
+
+
+	<div class="container">
+		<table id="employeeTable">
+			<thead>
+				<tr>
+					<th>Type ID</th>
+					<th>Login ID</th>
+					<th>Role</th>
+					<th>Region</th>
+					<!-- Add more table headers for other fields as needed -->
+				</tr>
+			</thead>
+			<tbody id="resultbody">
+				<!-- Table body will be populated dynamically using JavaScript -->
+			</tbody>
+		</table>
+
+		<div class="pagination">
+
+		</div>
+
+		<div>
+			<label for="pageSize">Page Size:</label>
+			<input type="number" id="pageSize" min="1" value="2" />
+			<button onclick="updatePageSize()">Update</button>
+		</div>
+
+
+
+		<!--This Script by piyush-->
+		<script th:inline="javascript">
+
+			/*function generatePageList() {
+	
+			const url = 'http://localhost:2003/getpagelist'; // Replace with your API endpoint
+	
+			fetch(url)
+				.then(async response => {
+					if (!response.ok) {
+	
+						throw new Error('Network response was not ok');
+					}
+					const contentType = response.headers.get('content-type');
+					let data;
+					if (contentType && contentType.includes('application/json')) {
+						try {
+							data = await response.json();
+						} catch (error) {
+	
+							throw new Error('Error parsing JSON');
+						}
+					} else {
+						try {
+							data = await response.text();
+						} catch (error) {
+	
+							throw new Error('Error parsing text');
+						}
+					}
+					return data;
+				})
+				.then(data => {
+					if (typeof data === 'object') {
+						console.log(JSON.stringify(data));
+						generateTableData(data);
+					} else {
+	
+					}
+				})
+				.catch(error => {
+					console.log(""+error);
+				});
+		}
+	
+		window.onload = function () {
+			generatePageList(); // Call the function when the window loads
+		};
+	
+	
+		function generateTableData(data) {
+			const tableBody = document.getElementById("resultbody");
+			const pageSize = data.pageSize;
+			const totalPages = data.totalPages;
+			
+			createPagination(totalPages);
+			// Iterate through the content array and populate the table rows
+			data.content.forEach(employee => {
+				const row = document.createElement('tr');
+	
+				const typeIdCell = document.createElement('td');
+				typeIdCell.textContent = employee.typeidEm;
+				row.appendChild(typeIdCell);
+	
+				const loginIdCell = document.createElement('td');
+				loginIdCell.textContent = employee.loginidEm;
+				row.appendChild(loginIdCell);
+	
+				const roleCell = document.createElement('td');
+				roleCell.textContent = employee.roleRmEm;
+				row.appendChild(roleCell);
+	
+				const regionCell = document.createElement('td');
+				regionCell.textContent = employee.regionEm;
+				row.appendChild(regionCell);
+	
+		
+				tableBody.appendChild(row);
+			});
+			 
+		}
+		
+		
+		function createPagination(totalPages) {
+		const paginationDiv = document.querySelector('.pagination');
+		paginationDiv.innerHTML = '';
+	
+		for (let i = 1; i <= totalPages; i++) {
+			const pageLink = document.createElement('a');
+			pageLink.href = '#';
+			pageLink.textContent = i;
+			pageLink.classList.add('page-number');
+	
+			pageLink.addEventListener('click', function(event) {
+				event.preventDefault();
+				const pageNumber = parseInt(event.target.textContent);
+				displayPage(pageNumber);
+			});
+	
+			paginationDiv.appendChild(pageLink);
+		}
+	}*/
+
+		</script>
+
+		<!--test fiest pass-->
+		<script th:inline="javascript">
+		// JavaScript code for pagination and data retrieval
+
+			/*let currentPage = 1;
+			let totalPages = 1;
+			const pageSize = 3; // Number of records per page
+	
+			// Function to fetch data from the API and update the table
+			function generatePageList() {
+				const url = `http://localhost:2003/getpagelist?pageNo=${currentPage}&pageSize=${pageSize}`;
+	
+				fetch(url)
+					.then(async response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+	
+						const contentType = response.headers.get('content-type');
+						let data;
+	
+						if (contentType && contentType.includes('application/json')) {
+							data = await response.json();
+						} else {
+							data = await response.text();
+						}
+	
+						updateTableData(data);
+					})
+					.catch(error => {
+						console.log('Error:', error);
+					});
+			}
+	
+			// Function to update the table with retrieved data
+			function updateTableData(data) {
+				const tableBody = document.getElementById("resultbody");
+	
+				// Clear the table before populating with new data
+				tableBody.innerHTML = '';
+	
+				if (data.content && data.content.length > 0) {
+					data.content.forEach(employee => {
+						const row = document.createElement('tr');
+	
+						const typeIdCell = document.createElement('td');
+						typeIdCell.textContent = employee.typeidEm;
+						row.appendChild(typeIdCell);
+	
+						const loginIdCell = document.createElement('td');
+						loginIdCell.textContent = employee.loginidEm;
+						row.appendChild(loginIdCell);
+	
+						const roleCell = document.createElement('td');
+						roleCell.textContent = employee.roleRmEm;
+						row.appendChild(roleCell);
+	
+						const regionCell = document.createElement('td');
+						regionCell.textContent = employee.regionEm;
+						row.appendChild(regionCell);
+	
+						tableBody.appendChild(row);
+					});
+				} else {
+					// Handle case where no data is available
+					const noDataRow = document.createElement('tr');
+					const noDataCell = document.createElement('td');
+					noDataCell.textContent = 'No data available';
+					noDataCell.colSpan = 4; // Adjust the colspan based on the number of columns
+					noDataRow.appendChild(noDataCell);
+					tableBody.appendChild(noDataRow);
+				}
+	
+				createPagination(data.totalPages);
+			}
+	
+			// Function to create pagination links
+			function createPagination(totalPages) {
+				const paginationDiv = document.querySelector('.pagination');
+				paginationDiv.innerHTML = '';
+	
+				createPageLink('First', 1);
+	
+				createPageLink('Previous', currentPage - 1);
+	
+				for (let i = 1; i <= totalPages; i++) {
+					createPageLink(i, i);
+				}
+	
+				createPageLink('Next', currentPage + 1);
+	
+				createPageLink('Last', totalPages);
+			}
+	
+			// Function to create individual page link
+			function createPageLink(text, pageNumber) {
+				const paginationDiv = document.querySelector('.pagination');
+				const pageLink = document.createElement('a');
+				pageLink.href = '#';
+				pageLink.textContent = text;
+	
+				if (text === currentPage.toString()) {
+					pageLink.classList.add('page-number', 'current-page');
+				} else {
+					pageLink.classList.add('page-number');
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						if (pageNumber >= 1 && pageNumber <= totalPages) {
+							currentPage = pageNumber;
+							generatePageList();
+						}
+					});
+				}
+	
+				paginationDiv.appendChild(pageLink);
+			}
+	
+			// Call the function when the window loads
+			window.onload = function () {
+				generatePageList();
+			};*/
+
+		</script>
+
+		<script th:inline="javascript">
+			/*let currentPage = 0;
+			let totalPages = 3;
+			const pageSize = 3; // Number of records per page
+
+			function generatePageList() {
+				const url = `http://localhost:2003/getpagelist?pageNo=${currentPage}&pageSize=${pageSize}`;
+
+				fetch(url)
+					.then(async response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+
+						const contentType = response.headers.get('content-type');
+						let data;
+
+						if (contentType && contentType.includes('application/json')) {
+							data = await response.json();
+						} else {
+							data = await response.text();
+						}
+
+						updateTableData(data);
+					})
+					.catch(error => {
+						console.log('Error:', error);
+					});
+			}
+
+			function createPagination(totalPages) {
+				const paginationDiv = document.querySelector('.pagination');
+				paginationDiv.innerHTML = '';
+
+				createPageLink('First', 1);
+				createPageLink('Previous', currentPage - 1);
+
+				for (let i = 1; i <= totalPages; i++) {
+					createPageLink(i, i);
+				}
+
+				createPageLink('Next', currentPage + 1);
+				createPageLink('Last', totalPages);
+			}
+
+			function createPageLink(text, pageNumber) {
+				const paginationDiv = document.querySelector('.pagination');
+				const pageLink = document.createElement('a');
+				pageLink.href = '#';
+				pageLink.textContent = text;
+				pageLink.classList.add('page-number');
+
+				if (text === 'First' || text === 'Previous' || text === 'Next' || text === 'Last') {
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						handleSpecialPagination(text);
+					});
+				} else {
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						currentPage = pageNumber;
+						generatePageList();
+					});
+				}
+
+				if (text === currentPage.toString()) {
+					pageLink.classList.add('current-page');
+				}
+
+				paginationDiv.appendChild(pageLink);
+			}
+
+			function handleSpecialPagination(type) {
+				switch (type) {
+					case 'First':
+						currentPage = 0;
+						break;
+					case 'Previous':
+						if (currentPage > 1) {
+							currentPage--;
+						}
+						break;
+					case 'Next':
+						if (currentPage < totalPages) {
+							currentPage++;
+						}
+						break;
+					case 'Last':
+						currentPage = totalPages;
+						break;
+				}
+
+				generatePageList();
+			}
+
+			function updateTableData(data) {
+				const tableBody = document.getElementById("resultbody");
+				tableBody.innerHTML = '';
+
+				if (data.content && data.content.length > 0) {
+					data.content.forEach(employee => {
+						const row = document.createElement('tr');
+
+						const typeIdCell = document.createElement('td');
+						typeIdCell.textContent = employee.typeidEm;
+						row.appendChild(typeIdCell);
+
+						const loginIdCell = document.createElement('td');
+						loginIdCell.textContent = employee.loginidEm;
+						row.appendChild(loginIdCell);
+
+						const roleCell = document.createElement('td');
+						roleCell.textContent = employee.roleRmEm;
+						row.appendChild(roleCell);
+
+						const regionCell = document.createElement('td');
+						regionCell.textContent = employee.regionEm;
+						row.appendChild(regionCell);
+
+						tableBody.appendChild(row);
+					});
+				} else {
+					// Handle case where no data is available
+					const noDataRow = document.createElement('tr');
+					const noDataCell = document.createElement('td');
+					noDataCell.textContent = 'No data available';
+					noDataCell.colSpan = 4; // Adjust the colspan based on the number of columns
+					noDataRow.appendChild(noDataCell);
+					tableBody.appendChild(noDataRow);
+				}
+
+				createPagination(data.totalPages);
+			}
+
+			window.onload = function () {
+				generatePageList();
+			};*/
+		</script>
+
+		<script th:inline="javascript">
+			/*let currentPage = 0;
+			let totalPages = 1;
+			let pageSize = 2; // Number of records per page
+
+			function generatePageList() {
+				const url = `http://localhost:2003/getpagelist?pageNo=${currentPage}&pageSize=${pageSize}`;
+
+				fetch(url)
+					.then(async response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+
+						const contentType = response.headers.get('content-type');
+						let data;
+
+						if (contentType && contentType.includes('application/json')) {
+							data = await response.json();
+						} else {
+							data = await response.text();
+						}
+
+						updateTableData(data);
+					})
+					.catch(error => {
+						console.log('Error:', error);
+					});
+			}
+
+			function createPagination(totalPages) {
+				const paginationDiv = document.querySelector('.pagination');
+				paginationDiv.innerHTML = '';
+
+				createPageLink('First', 0);
+				createPageLink('Previous', currentPage - 1);
+
+				for (let i = 1; i <= totalPages; i++) {
+					createPageLink(i, i - 1);
+				}
+
+				createPageLink('Next', currentPage + 1);
+				createPageLink('Last', totalPages - 1);
+			}
+
+			function createPageLink(text, pageNumber) {
+				const paginationDiv = document.querySelector('.pagination');
+				const pageLink = document.createElement('a');
+				pageLink.href = '#';
+				pageLink.textContent = text;
+				pageLink.classList.add('page-number');
+
+				if (text === 'First' || text === 'Previous' || text === 'Next' || text === 'Last') {
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						handleSpecialPagination(text);
+					});
+				} else {
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						currentPage = pageNumber;
+						generatePageList();
+					});
+				}
+
+				if (text === (currentPage + 1).toString()) {
+					pageLink.classList.add('current-page');
+				}
+
+				paginationDiv.appendChild(pageLink);
+			}
+
+			function handleSpecialPagination(type) {
+				switch (type) {
+					case 'First':
+						currentPage = 0;
+						break;
+					case 'Previous':
+						if (currentPage > 0) {
+							currentPage--;
+						}
+						break;
+					case 'Next':
+						if (currentPage < totalPages - 1) {
+							currentPage++;
+						}
+						break;
+					case 'Last':
+						currentPage = totalPages - 1;
+						break;
+				}
+
+				generatePageList();
+			}
+
+			function updateTableData(data) {
+				const tableBody = document.getElementById("resultbody");
+				tableBody.innerHTML = '';
+
+				if (data.content && data.content.length > 0) {
+					data.content.forEach(employee => {
+						const row = document.createElement('tr');
+
+						const typeIdCell = document.createElement('td');
+						typeIdCell.textContent = employee.typeidEm;
+						row.appendChild(typeIdCell);
+
+						const loginIdCell = document.createElement('td');
+						loginIdCell.textContent = employee.loginidEm;
+						row.appendChild(loginIdCell);
+
+						const roleCell = document.createElement('td');
+						roleCell.textContent = employee.roleRmEm;
+						row.appendChild(roleCell);
+
+						const regionCell = document.createElement('td');
+						regionCell.textContent = employee.regionEm;
+						row.appendChild(regionCell);
+
+						tableBody.appendChild(row);
+					});
+				} else {
+					// Handle case where no data is available
+					const noDataRow = document.createElement('tr');
+					const noDataCell = document.createElement('td');
+					noDataCell.textContent = 'No data available';
+					noDataCell.colSpan = 4; // Adjust the colspan based on the number of columns
+					noDataRow.appendChild(noDataCell);
+					tableBody.appendChild(noDataRow);
+				}
+
+				createPagination(data.totalPages);
+			}
+
+			function updatePageSize() {
+				const pageSizeInput = document.getElementById('pageSize');
+				const newPageSize = parseInt(pageSizeInput.value);
+
+				if (!isNaN(newPageSize) && newPageSize > 0) {
+					pageSize = newPageSize;
+					generatePageList();
+				}
+			}
+
+			window.onload = function () {
+				generatePageList();
+			};*/
+		</script>
+		<script th:inline="javascript">
+			let currentPage = 0;
+			let totalPages = 10;
+			let pageSize = 2; // Number of records per page
+
+			function generatePageList() {
+				const url = `http://localhost:2003/getpagelist?pageNo=${currentPage}&pageSize=${pageSize}`;
+
+				fetch(url)
+					.then(async response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+
+						const contentType = response.headers.get('content-type');
+						let data;
+
+						if (contentType && contentType.includes('application/json')) {
+							data = await response.json();
+						} else {
+							data = await response.text();
+						}
+
+						updateTableData(data);
+					})
+					.catch(error => {
+						console.log('Error:', error);
+					});
+			}
+
+			function createPagination(totalPages) {
+				const paginationDiv = document.querySelector('.pagination');
+				paginationDiv.innerHTML = '';
+
+				const maxVisiblePages = 5; // Set the maximum number of visible numeric pages
+
+				// Calculate the range of visible pages around the current page
+				const startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+				const endPage = Math.min(startPage + maxVisiblePages, totalPages);
+
+				createPageLink('First', 0);
+
+				if (startPage > 0) {
+					createPageLink('Previous', currentPage - 1);
+					if (startPage > 1) {
+						createPageLink('...', startPage - 1);
+					}
+				}
+
+				for (let i = startPage; i < endPage; i++) {
+					createPageLink(i + 1, i);
+				}
+
+				if (endPage < totalPages) {
+					if (endPage < totalPages - 1) {
+						createPageLink('...', endPage);
+					}
+					createPageLink('Next', currentPage + 1);
+					createPageLink('Last', totalPages - 1);
+				}
+
+				highlightCurrentPage(); // Highlight the current page
+			}
+
+			function createPageLink(text, pageNumber) {
+				const paginationDiv = document.querySelector('.pagination');
+				const pageLink = document.createElement('a');
+				pageLink.href = '#';
+				pageLink.textContent = text;
+				pageLink.classList.add('page-number');
+
+				if (text === 'First' || text === 'Previous' || text === 'Next' || text === 'Last') {
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						handleSpecialPagination(text);
+					});
+				} else {
+					pageLink.addEventListener('click', function (event) {
+						event.preventDefault();
+						currentPage = pageNumber;
+						generatePageList();
+					});
+				}
+
+				if (text === (currentPage + 1).toString()) {
+					pageLink.classList.add('current-page');
+				}
+
+				paginationDiv.appendChild(pageLink);
+			}
+
+			function handleSpecialPagination(type) {
+				switch (type) {
+					case 'First':
+						currentPage = 0;
+						break;
+					case 'Previous':
+						if (currentPage > 0) {
+							currentPage--;
+						}
+						break;
+					case 'Next':
+						if (currentPage < totalPages - 1) {
+							currentPage++;
+						}
+						break;
+					case 'Last':
+						currentPage = totalPages - 1;
+						break;
+				}
+
+				generatePageList();
+			}
+
+			function updateTableData(data) {
+				const tableBody = document.getElementById("resultbody");
+				tableBody.innerHTML = '';
+
+				if (data.content && data.content.length > 0) {
+					data.content.forEach(employee => {
+						const row = document.createElement('tr');
+
+						const typeIdCell = document.createElement('td');
+						typeIdCell.textContent = employee.typeidEm;
+						row.appendChild(typeIdCell);
+
+						const loginIdCell = document.createElement('td');
+						loginIdCell.textContent = employee.loginidEm;
+						row.appendChild(loginIdCell);
+
+						const roleCell = document.createElement('td');
+						roleCell.textContent = employee.roleRmEm;
+						row.appendChild(roleCell);
+
+						const regionCell = document.createElement('td');
+						regionCell.textContent = employee.regionEm;
+						row.appendChild(regionCell);
+
+						tableBody.appendChild(row);
+					});
+				} else {
+					// Handle case where no data is available
+					const noDataRow = document.createElement('tr');
+					const noDataCell = document.createElement('td');
+					noDataCell.textContent = 'No data available';
+					noDataCell.colSpan = 4; // Adjust the colspan based on the number of columns
+					noDataRow.appendChild(noDataCell);
+					tableBody.appendChild(noDataRow);
+				}
+
+				createPagination(data.totalPages);
+			}
+
+			function highlightCurrentPage() {
+				const pageLinks = document.querySelectorAll('.page-number');
+				pageLinks.forEach(link => {
+					link.classList.remove('current-page');
+					if (link.textContent === (currentPage + 1).toString()) {
+						link.classList.add('current-page');
+					}
+				});
+			}
+
+			function updatePageSize() {
+				const pageSizeInput = document.getElementById('pageSize');
+				const newPageSize = parseInt(pageSizeInput.value);
+
+				if (!isNaN(newPageSize) && newPageSize > 0) {
+					pageSize = newPageSize;
+					generatePageList();
+				}
+			}
+
+			window.onload = function () {
+				generatePageList();
+			};
+		</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>
