@@ -5,3 +5,8 @@ learning backend-frontend integration and modern pagination techniques."
 
 ## sample screenshot
 ![image2](https://github.com/tavanojirutik/Pagination_Thymeleaf_to_FetchAPI_SpringBoot/blob/main/Capture.JPG)
+
+
+## Pagination Descding Order 
+"Replace This File "Pageable pageable = PageRequest.of(pageno, pagesize);" to 
+This File "Pageable pageable = PageRequest.of(pageno, pagesize, Sort.by(Sort.Direction.DESC, "typeidIm"));" "
